@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Wallet Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #wallet-info {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <button id="connect-wallet">Connect Wallet</button>
+  <button id="disconnect-wallet" style="display: none;">Disconnect Wallet</button>
+  <button id="read-wallet" style="display: none;">Get Wallet Balance</button>
+  <div id="wallet-info"></div>
+  <br><br>
+  <button onclick="deployContract()">Deploy</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.7.3/dist/web3.min.js"></script>
+  <script>
+    const connectWalletButton = document.getElementById('connect-wallet');
+    const disconnectWalletButton = document.getElementById('disconnect-wallet');
+    const readWalletButton = document.getElementById('read-wallet');
+    const walletInfoDiv = document.getElementById('wallet-info');
+
+    const web3 = new Web3(window.ethereum);
+    var currentAccount = null;
+
+    // Comprobar si Web3 está disponible (MetaMask está instalado)
+    if (typeof window.ethereum !== 'undefined') {
+      
+
+      
+
+      // Solicitar permiso para acceder a la wallet
+      connectWalletButton.addEventListener('click', async () => {
+        try {
+          // Solicitar permiso y obtener la cuenta seleccionada
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          currentAccount = accounts[0];
+          walletInfoDiv.textContent = `Wallet connected: ${currentAccount}`;
+          connectWalletButton.style.display = 'none';
+          disconnectWalletButton.style.display = 'inline-block';
+          readWalletButton.style.display = 'inline-block';
+        } catch (error) {
+          console.error('Error connecting wallet:', error);
+          walletInfoDiv.textContent = 'Error connecting wallet';
+        }
+      });
+
+      // Desconectar la wallet
+      disconnectWalletButton.addEventListener('click', async () => {
+        try {
+          // Eliminar la información de la cuenta
+          currentAccount = null;
+          walletInfoDiv.textContent = 'Wallet disconnected';
+          connectWalletButton.style.display = 'inline-block';
+          disconnectWalletButton.style.display = 'none';
+          readWalletButton.style.display = 'none';
+        } catch (error) {
+          console.error('Error disconnecting wallet:', error);
+          walletInfoDiv.textContent = 'Error disconnecting wallet: ' + error.message;
+        }
+      });
+
+      // Leer el saldo de la wallet
+      readWalletButton.addEventListener('click', async () => {
+        try {
+          const balance = await web3.eth.getBalance(currentAccount);
+          const balanceInEther = web3.utils.fromWei(balance, 'ether');
+          walletInfoDiv.textContent = `Wallet balance: ${balanceInEther} ETH`;
+        } catch (error) {
+          console.error('Error reading wallet balance:', error);
+          walletInfoDiv.textContent = 'Error reading wallet balance';
+        }
+      });
+
+      // Inicialmente, mostrar el botón "Connect Wallet" y ocultar el botón "Disconnect Wallet" y "Get Wallet Balance"
+      disconnectWalletButton.style.display = 'none';
+      readWalletButton.style.display = 'none';
+    } else {
+      walletInfoDiv.textContent = 'Please install MetaMask to use this feature.';
+    }
+  </script>
+  <script src="./script.js"></script>
+
+
+</body>
+</html>
